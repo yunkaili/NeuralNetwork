@@ -11,6 +11,13 @@ public:
 	void forward(float *w1, float *w2, float *xn, int yn, float &pre_lbl);
 	float errorSum(float *w1, float *w2);
 
+	float train2();
+	void forward2(float *w1, float *w2, float *w3, float *xn, int yn, float &pre_lbl);
+	float errorSum2(float *w1, float *w2, float *w3);
+
+	void gradientChecking();
+	float NNCost(float *w1, float *w2, float *w3);
+	
 	template<class T>
 	void ptrCheck(T *start, T *ptr, T val_limit, int dist_limit)
 	{
