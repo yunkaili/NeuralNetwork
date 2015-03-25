@@ -1,15 +1,19 @@
-#include "NNet.h"
-#include <stdio.h>
+#pragma once
+#include "ITrain.h"
+#include <time.h>
+
 void main()
 {
-	NNet m;
-	m.ImportTrainingData("data/train.dat");
-	m.ImportTestingData("data/test.dat");
-	float sum = 0.0f;
-	for(int i  = 0; i < 500; i++)
+	srand(clock());
+	ITrain m_train;
+	
+	m_train.ImportTrainingData("data/train.dat");
+	m_train.ImportTestingData("data/test.dat");
+	for(int i = 0; i < 500; i++)
 	{
-		sum += m.train();
-		printf("round %d Eout %f\n", i+1, sum / (i+1));
-	}	
-	printf("Eout %f\n", sum/500);
+		m_train.clear_config();
+		m_train.config();
+		m_train.train();
+	}
+
 }

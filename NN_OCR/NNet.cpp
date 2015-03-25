@@ -34,11 +34,11 @@ void NNet::ImportTrainingData(char *dataFile)
 	fread(&dim, sizeof(int), 1, pf);
 	fread(&num, sizeof(int), 1, pf);
 
-	float *X = new float[num*dim];
+	double *X = new double[num*dim];
 	int *Y = new int[num];
 	for(int i = 0; i < num; i++)
 	{
-		fread(X+i*dim, sizeof(float), dim, pf);
+		fread(X+i*dim, sizeof(double), dim, pf);
 		fread(Y+i, sizeof(int), 1, pf);
 	}
 
@@ -46,10 +46,10 @@ void NNet::ImportTrainingData(char *dataFile)
 	this->nDim = dim;
 	this->nData = num;
 
-	this->data = new float[num*dim];
+	this->data = new double[num*dim];
 	this->label = new int[num];
 
-	memcpy(this->data, X, sizeof(float)*num*dim);
+	memcpy(this->data, X, sizeof(double)*num*dim);
 	memcpy(this->label, Y, sizeof(int)*num);
 
 	delete[] X;
@@ -67,11 +67,11 @@ void NNet::ImportTestingData(char *dataFile)
 	fread(&dim, sizeof(int), 1, pf);
 	fread(&num, sizeof(int), 1, pf);
 
-	float *X = new float[num*dim];
+	double *X = new double[num*dim];
 	int *Y = new int[num];
 	for(int i = 0; i < num; i++)
 	{
-		fread(X+i*dim, sizeof(float), dim, pf);
+		fread(X+i*dim, sizeof(double), dim, pf);
 		fread(Y+i, sizeof(int), 1, pf);
 	}
 
@@ -79,17 +79,17 @@ void NNet::ImportTestingData(char *dataFile)
 	this->nDimt = dim;
 	this->nDatat = num;
 
-	this->datat = new float[num*dim];
+	this->datat = new double[num*dim];
 	this->labelt = new int[num];
 
-	memcpy(this->datat, X, sizeof(float)*num*dim);
+	memcpy(this->datat, X, sizeof(double)*num*dim);
 	memcpy(this->labelt, Y, sizeof(int)*num);
 
 	delete[] X;
 	delete[] Y;
 }
 
-float NNet::train()
+double NNet::train()
 {
 	srand(clock());
 	//	srand(0);
@@ -99,65 +99,65 @@ float NNet::train()
 	int Dim2 = 1;
 
 	// training parameters
-	float lr = 0.1;
-	float r = 0.1;
+	double lr = 0.01;
+	double r = 0.1;
 	int iter_times = 50000;
 
-	float *w1 = new float[(Dim0+1)*Dim1];
+	double *w1 = new double[(Dim0+1)*Dim1];
 	for(int i = 0; i < (Dim0+1)*Dim1; i++)
-		w1[i] = (float)rand() / (5*RAND_MAX)-0.1;
+		w1[i] = (double)rand() / (5*RAND_MAX)-0.1;
 
-	float *w2 = new float[(Dim1+1) * Dim2];
+	double *w2 = new double[(Dim1+1) * Dim2];
 	for(int i = 0; i < (Dim1+1)*Dim2; i++)
-		w2[i] = (float)rand() / (5*RAND_MAX)-0.1;
+		w2[i] = (double)rand() / (5*RAND_MAX)-0.1;
 
 	while(iter_times--)
 	{
 		// init
 		int ridx = rand() * (this->nData-1) / RAND_MAX;
 		//printf("ridx %d\n", ridx);
-		float *pdata = this->data + ridx * this->nDim;
+		double *pdata = this->data + ridx * this->nDim;
 		int *py = this->label + ridx;
 
 		// Forward
-		float *x0 = new float[Dim0+1];
+		double *x0 = new double[Dim0+1];
 		x0[0] = 1;
 		for(int i = 0; i < Dim0; i++)
 			x0[i+1] = pdata[i];
 
-		//float *w1 = new float[(Dim0+1)*Dim1];
+		//double *w1 = new double[(Dim0+1)*Dim1];
 		//for(int i = 0; i < (Dim0+1)*Dim1; i++)
-		//	w1[i] = (float)rand() / RAND_MAX;
+		//	w1[i] = (double)rand() / RAND_MAX;
 
 		//		S1 = X0 * W0;
 		// [Dim1 * 1] = [Dim0+1] [Dim0+1 * Dim1]
-		float *s1 = new float[Dim1];
-		float *pw1 = w1;
+		double *s1 = new double[Dim1];
+		double *pw1 = w1;
 		for(int i = 0; i < Dim1; i++, pw1+= (Dim0+1))
 		{
-			float sum = 0.0f;
+			double sum = 0.0f;
 			for(int k = 0; k < Dim0+1; k++)
 				sum += x0[k]*pw1[k];
 			s1[i] = sum;
 		}
 
 		//	X1 = tanh(S1);
-		float *x1 = new float[Dim1+1];
+		double *x1 = new double[Dim1+1];
 		x1[0] = 1;
 		for(int i = 0; i<Dim1; i++)
 			x1[i+1] = tanh(s1[i]);
 
-		//float *w2 = new float[(Dim1+1) * Dim2];
+		//double *w2 = new double[(Dim1+1) * Dim2];
 		//for(int i = 0; i < (Dim1+1)*Dim2; i++)
-		//	w2[i] = (float)rand() / RAND_MAX;
+		//	w2[i] = (double)rand() / RAND_MAX;
 
 		//		S2 = X1 * W1;
 		// [Dim2 * 1] = [Dim1+1] [(Dim1+1) * Dim2] 
-		float *s2 = new float[Dim2];
-		float *pw2 = w2;
+		double *s2 = new double[Dim2];
+		double *pw2 = w2;
 		for(int i = 0; i < Dim2; i++, pw2+= (Dim1+1))
 		{
-			float sum = 0.0f;
+			double sum = 0.0f;
 			for(int k = 0; k < Dim1+1; k++)
 				sum += x1[k]*pw2[k];
 			s2[i] = sum;
@@ -167,17 +167,19 @@ float NNet::train()
 		// single output
 
 		// theta2 = - 2 * (yn - s2[1])
-		float theta2 = - 2 * (*py - tanh(s2[0])) / (cosh(s2[0])*cosh(s2[0]));
+		double theta2 = - 2 * (*py - tanh(s2[0])) / (cosh(s2[0])*cosh(s2[0]));
 
-		float *theta1 = new float[Dim1];
+		double *theta1 = new double[Dim1];
 		pw2 = w2+1;
 		for(int i = 0; i < Dim1; i++, pw2+= Dim2)
 		{
-			float sum = 0.0f;
+			double sum = 0.0f;
 			for(int k = 0; k < Dim2; k++)
 				sum += theta2 * pw2[k] / (cosh(s1[i])*cosh(s1[i]));
 			theta1[i] = sum;
 		}
+
+		//gradientChecking(w1, w2, theta1, theta2, pdata, *py);
 
 		// Update
 		// w(layer)ij = w(layer)ij - lr*x(layer-1)i*theta(layer)j;
@@ -186,27 +188,16 @@ float NNet::train()
 		pw2 = w2;
 		for(int i = 0; i < Dim2;i++, pw2 += (Dim1+1))
 		{
-			float theta = theta2;
-
-#if NUMERICAL_CHECK
-			ptrCheck(w2, pw2, 1000.0f, 7);
-#endif
-
+			double theta = theta2;
 			for(int k = 0; k < Dim1+1; k++)
-			{			
 				pw2[k] -= lr*x1[k] *theta;
-#if NUMERICAL_CHECK
-				ptrCheck(w2, pw2, 1000.0f, 7);
-#endif
-
-			}
 		}
 
 		// update w1
 		pw1 = w1;
 		for(int i = 0; i < Dim1;i++, pw1 += (Dim0+1))
 		{
-			float theta = theta1[i];
+			double theta = theta1[i];
 			for(int k = 0; k < Dim0+1; k++)
 				pw1[k] -= lr*x0[k] * theta;
 		}
@@ -218,8 +209,8 @@ float NNet::train()
 		delete[] theta1;
 	}
 
-	float error_sum = errorSum(w1, w2) / this->nDatat;
-	printf("END::error_sum %f\n", error_sum	);
+	double error_sum = errorSum(w1, w2) / this->nDatat;
+	//printf("END::error_sum %lf\n", error_sum);
 
 	delete[] w1;
 	delete[] w2;
@@ -227,37 +218,37 @@ float NNet::train()
 	return error_sum;
 }
 
-void NNet::forward(float *w1, float *w2, float *xn, int yn, float &pre_lbl)
+void NNet::forward(double *w1, double *w2, double *xn, int yn, double &pre_lbl)
 {
 	int Dim0 = this->nDim;
 	int Dim1 = 6;
 	int Dim2 = 1;
 	
-	float *x0 = new float[Dim0+1];
+	double *x0 = new double[Dim0+1];
 	x0[0] = 1;
 	for(int i = 0; i < Dim0; i++)
 		x0[i+1] = xn[i];
 
-	float *s1 = new float[Dim1];
-	float *pw1 = w1;
+	double *s1 = new double[Dim1];
+	double *pw1 = w1;
 	for(int i = 0; i < Dim1; i++, pw1+= (Dim0+1))
 	{
-		float sum = 0.0f;
+		double sum = 0.0f;
 		for(int k = 0; k < Dim0+1; k++)
 			sum += x0[k]*pw1[k];
 		s1[i] = sum;
 	}
 
-	float *x1 = new float[Dim1+1];
+	double *x1 = new double[Dim1+1];
 	x1[0] = 1;
 	for(int i = 0; i<Dim1; i++)
 		x1[i+1] = tanh(s1[i]);
 
-	float *s2 = new float[Dim2];
-	float *pw2 = w2;
+	double *s2 = new double[Dim2];
+	double *pw2 = w2;
 	for(int i = 0; i < Dim2; i++, pw2+= (Dim1+1))
 	{
-		float sum = 0.0f;
+		double sum = 0.0f;
 		for(int k = 0; k < Dim1+1; k++)
 			sum += x1[k]*pw2[k];
 		s2[i] = sum;
@@ -270,14 +261,14 @@ void NNet::forward(float *w1, float *w2, float *xn, int yn, float &pre_lbl)
 	delete[] s2;
 }
 
-float NNet::errorSum(float *w1, float *w2)
+double NNet::errorSum(double *w1, double *w2)
 {
-	float error_sum = 0.0f;
-	float *pX = this->datat;
+	double error_sum = 0.0f;
+	double *pX = this->datat;
 	int *pY = this->labelt;
 	for(int i = 0; i < this->nDatat; i++, pX += this->nDim, pY++)
 	{
-		float pre_lbl;
+		double pre_lbl;
 		forward(w1, w2, pX, *pY, pre_lbl);
 		int r = *pY - pre_lbl;
 		error_sum += abs(r/2);
@@ -286,11 +277,145 @@ float NNet::errorSum(float *w1, float *w2)
 }
 
 
-
-float NNet::train2()
+void NNet::gradientChecking(double *w1, double *w2, double *theta1, double theta2, double *xn, int yn)
 {
-	srand(0);
-	//	srand(0);
+	double epsilon = 0.0001;
+
+	int Dim0 = this->nDim;
+	int Dim1 = 6;
+	int Dim2 = 1;
+
+	double *w1t = new double[(Dim0+1)*Dim1];
+	memcpy(w1t, w1, sizeof(double)*(Dim0+1)*Dim1);
+	double *w2t = new double[(Dim1+1)*Dim2];
+	memcpy(w2t, w2, sizeof(double)*(Dim1+1)*Dim2);
+
+	// check w1
+	double *pw1t = w1t, *pw1 = w1;
+	double *x0 = new double[Dim0+1];
+	x0[0] = 1;
+	for(int i = 0; i < Dim0; i++)
+		x0[i+1] = xn[i];
+
+	for(int i = 0; i < Dim1; i++)
+	{
+		for(int j = 0; j < Dim0+1; j++)
+		{
+			*pw1t = *pw1 + epsilon;
+			double Jplus = NNCost(w1t, w2t, xn, yn);
+			*pw1t = *pw1 - epsilon;
+			double Jminus = NNCost(w1t, w2t, xn, yn);
+			double deltaw1 = (Jplus - Jminus) / (2* epsilon);
+			double deltaw0 = theta1[i] * x0[j];		
+			if( abs(deltaw1 - deltaw0) > epsilon )
+				printf("gradient error!\nformula %0.5f\tlimit %0.5f\tdiff %0.5f\n", deltaw0, deltaw1, abs(deltaw0-deltaw1));
+			*pw1t = *pw1;
+			pw1t++;
+			pw1++;
+		}
+	}
+
+	double *s1 = new double[Dim1];
+	pw1 = w1;
+	for(int i = 0; i < Dim1; i++, pw1+= (Dim0+1))
+	{
+		double sum = 0.0f;
+		for(int k = 0; k < Dim0+1; k++)
+			sum += x0[k]*pw1[k];
+		s1[i] = sum;
+	}
+	
+	// check w2
+	double *pw2t = w2t, *pw2 = w2;
+	double *x1 = new double[Dim1+1];
+	x1[0] = 1;
+	for(int i = 0; i<Dim1; i++)
+		x1[i+1] = tanh(s1[i]);
+
+
+	for(int i = 0; i < Dim2; i++)
+	{
+		for(int j = 0; j < Dim1+1; j++)
+		{
+			*pw2t = *pw2 + epsilon;
+			double Jplus = NNCost(w1t, w2t, xn, yn);
+			*pw2t = *pw2 - epsilon;
+			double Jminus = NNCost(w1t, w2t, xn, yn);
+			double deltaw1 = (Jplus - Jminus) / (2* epsilon);
+			double deltaw0 = theta2 * x1[j];		
+			if( abs(deltaw1 - deltaw0) > epsilon )
+				printf("gradient error!\nformula %0.5f\tlimit %0.5f\tdiff %0.5f\n", deltaw0, deltaw1, abs(deltaw0-deltaw1));
+			*pw2t = *pw2;
+			pw2t++;
+			pw2++;
+		}
+	}
+
+	delete[] x0;
+	delete[] s1;
+	delete[] x1;
+	delete[] w1t;
+	delete[] w2t;
+
+}
+
+
+double NNet::NNCost(double *w1, double *w2, double *xn, int yn)
+{
+	int Dim0 = this->nDim;
+	int Dim1 = 6;
+	int Dim2 = 1;
+
+	double *x0 = new double[Dim0+1];
+	x0[0] = 1;
+	for(int i = 0; i < Dim0; i++)
+		x0[i+1] = xn[i];
+
+	double *s1 = new double[Dim1];
+	double *pw1 = w1;
+	for(int i = 0; i < Dim1; i++, pw1+= (Dim0+1))
+	{
+		double sum = 0.0f;
+		for(int k = 0; k < Dim0+1; k++)
+			sum += x0[k]*pw1[k];
+		s1[i] = sum;
+	}
+
+	//	X1 = tanh(S1);
+	double *x1 = new double[Dim1+1];
+	x1[0] = 1;
+	for(int i = 0; i<Dim1; i++)
+		x1[i+1] = tanh(s1[i]);
+
+	//		S2 = X1 * W1;
+	// [Dim2 * 1] = [Dim1+1] [(Dim1+1) * Dim2] 
+	double *s2 = new double[Dim2];
+	double *pw2 = w2;
+	for(int i = 0; i < Dim2; i++, pw2+= (Dim1+1))
+	{
+		double sum = 0.0f;
+		for(int k = 0; k < Dim1+1; k++)
+			sum += x1[k]*pw2[k];
+		s2[i] = sum;
+	}
+
+	double J = (yn - tanh(s2[0]));
+	J *= J;
+
+	delete[] x0;
+	delete[] s1;
+	delete[] x1;
+	delete[] s2;
+
+	return J;
+}
+
+
+double NNet::train2()
+{
+	srand(clock());
+	//srand(0);
+	
 	// layer parameters
 	int Dim0 = this->nDim;
 	int Dim1 = 8;
@@ -298,79 +423,79 @@ float NNet::train2()
 	int Dim3 = 1;
 
 	// training parameters
-	float lr = 0.01;
-	float r = 0.1;
+	double lr = 0.01;
+	double r = 0.1;
 	int iter_times = 50000;
 
-	float *w1 = new float[(Dim0+1)*Dim1];
+	double *w1 = new double[(Dim0+1)*Dim1];
 	for(int i = 0; i < (Dim0+1)*Dim1; i++)
-		w1[i] = (float)rand() *2 * r / RAND_MAX - r ;
+		w1[i] = (double)rand() *2 * r / RAND_MAX - r ;
 
-	float *w2 = new float[(Dim1+1) * Dim2];
+	double *w2 = new double[(Dim1+1) * Dim2];
 	for(int i = 0; i < (Dim1+1)*Dim2; i++)
-		w2[i] = (float)rand() *2 * r / RAND_MAX - r ;
+		w2[i] = (double)rand() *2 * r / RAND_MAX - r ;
 
-	float *w3 = new float[(Dim2+1) * Dim3];
+	double *w3 = new double[(Dim2+1) * Dim3];
 	for(int i = 0; i < (Dim2+1)*Dim3; i++)
-		w3[i] = (float)rand() *2 * r / RAND_MAX - r ;
+		w3[i] = (double)rand() *2 * r / RAND_MAX - r ;
 
 	while(iter_times--)
 	{
 		// init
 		int ridx = rand() * (this->nData-1) / RAND_MAX;
 		//printf("ridx %d\n", ridx);
-		float *pdata = this->data + ridx * this->nDim;
+		double *pdata = this->data + ridx * this->nDim;
 		int *py = this->label + ridx;
 
 		// Forward
-		float *x0 = new float[Dim0+1];
+		double *x0 = new double[Dim0+1];
 		x0[0] = 1;
 		for(int i = 0; i < Dim0; i++)
 			x0[i+1] = pdata[i];
 
 		//		S1 = X0 * W0;
 		// [Dim1 * 1] = [Dim0+1] [Dim0+1 * Dim1]
-		float *s1 = new float[Dim1];
-		float *pw1 = w1;
+		double *s1 = new double[Dim1];
+		double *pw1 = w1;
 		for(int i = 0; i < Dim1; i++, pw1+= (Dim0+1))
 		{
-			float sum = 0.0f;
+			double sum = 0.0f;
 			for(int k = 0; k < Dim0+1; k++)
 				sum += x0[k]*pw1[k];
 			s1[i] = sum;
 		}
 
 		//	X1 = tanh(S1);
-		float *x1 = new float[Dim1+1];
+		double *x1 = new double[Dim1+1];
 		x1[0] = 1;
 		for(int i = 0; i<Dim1; i++)
 			x1[i+1] = tanh(s1[i]);
 
 		//		S2 = X1 * W1;
 		// [Dim2 * 1] = [Dim1+1] [(Dim1+1) * Dim2] 
-		float *s2 = new float[Dim2];
-		float *pw2 = w2;
+		double *s2 = new double[Dim2];
+		double *pw2 = w2;
 		for(int i = 0; i < Dim2; i++, pw2+= (Dim1+1))
 		{
-			float sum = 0.0f;
+			double sum = 0.0f;
 			for(int k = 0; k < Dim1+1; k++)
 				sum += x1[k]*pw2[k];
 			s2[i] = sum;
 		}
 
 		// X2 = tanh(S2)
-		float *x2 = new float[Dim2+1];
+		double *x2 = new double[Dim2+1];
 		x2[0] = 1;
 		for(int i = 0; i < Dim2; i++)
 			x2[i+1] = tanh(s2[i]);
 
 		//	S3 = X2 * W2;
 		// [Dim2 * 1] = [Dim2+1] [ (Dim2+1) * Dim3]
-		float *s3 = new float[Dim3];
-		float *pw3 = w3;
+		double *s3 = new double[Dim3];
+		double *pw3 = w3;
 		for(int i = 0; i < Dim3; i++, pw3 += (Dim2+1))
 		{
-			float sum = 0.0f;
+			double sum = 0.0f;
 			for(int k = 0; k < Dim2+1; k++)
 				sum += x2[k]*pw3[k];
 			s3[i] = sum;
@@ -379,29 +504,31 @@ float NNet::train2()
 		// Back_propagation
 		// single output
 
-		// theta3 = - 2 * (yn - s2[1])
-		float theta3 = - 2 * (*py - tanh(s3[0])) / (cosh(s3[0])*cosh(s3[0]));
+		// theta3 = - 2 * (yn - x3[1]) * x3'[1]
+		double theta3 = - 2 * (*py - tanh(s3[0])) * (1 - (tanh(s3[0]) * tanh(s3[0])));
 
-		float *theta2 = new float[Dim2];
-		pw3 = w3+1;
-		for(int i = 0; i < Dim2; i++, pw3+= Dim3)
+		double *theta2 = new double[Dim2];
+		for(int i = 0; i < Dim2; i++)
 		{
-			float sum = 0.0f;
-			for(int k = 0; k < Dim3; k++)
-				sum += theta3 * pw3[k] / (cosh(s2[i])*cosh(s2[i]));
+			pw3 = w3 + i + 1;
+			double sum = 0.0f;
+			for(int k = 0; k < Dim3; k++, pw3 += (Dim2+1))
+				sum += theta3 * (*pw3) / (cosh(s2[i])*cosh(s2[i]));
 			theta2[i] = sum;
 		}
 
-		float *theta1 = new float[Dim1];
-		pw2 = w2+1;
-		for(int i = 0; i < Dim1; i++, pw2+= Dim2)
+		double *theta1 = new double[Dim1];
+		for(int i = 0; i < Dim1; i++)
 		{
-			float sum = 0.0f;
-			for(int k = 0; k < Dim2; k++)
-				sum += theta2[i] * pw2[k] / (cosh(s1[i])*cosh(s1[i]));
+			pw2 = w2 + i + 1;
+			double sum = 0.0f;
+			for(int k = 0; k < Dim2; k++, pw2 += (Dim1+1))
+				sum += theta2[k] * (*pw2) / (cosh(s1[i])*cosh(s1[i]));
 			theta1[i] = sum;
 		}
 		
+		//gradientChecking2(w1, w2, w3, theta1, theta2, theta3, pdata, *py);
+
 		// Update
 		// w(layer)ij = w(layer)ij - lr*x(layer-1)i*theta(layer)j;
 
@@ -409,7 +536,7 @@ float NNet::train2()
 		pw3 = w3;
 		for(int i = 0; i < Dim3;i++, pw3 += (Dim2+1))
 		{
-			float theta = theta3;
+			double theta = theta3;
 			for(int k = 0; k < Dim2+1; k++)
 			{			
 				pw3[k] -= lr*x2[k] *theta;
@@ -420,7 +547,7 @@ float NNet::train2()
 		pw2 = w2;
 		for(int i = 0; i < Dim2;i++, pw2 += (Dim1+1))
 		{
-			float theta = theta2[i];
+			double theta = theta2[i];
 			for(int k = 0; k < Dim1+1; k++)
 				pw2[k] -= lr*x1[k] * theta;
 		}
@@ -430,7 +557,7 @@ float NNet::train2()
 		pw1 = w1;
 		for(int i = 0; i < Dim1;i++, pw1 += (Dim0+1))
 		{
-			float theta = theta1[i];
+			double theta = theta1[i];
 			for(int k = 0; k < Dim0+1; k++)
 				pw1[k] -= lr*x0[k] * theta;
 		}
@@ -446,8 +573,8 @@ float NNet::train2()
 		delete[] theta2;
 	}
 
-	float error_sum = errorSum2(w1, w2, w3) / this->nDatat;
-	printf("END::error_sum %f\n", error_sum	);
+	double error_sum = errorSum2(w1, w2, w3) / this->nDatat;
+	printf("END::error_sum %lf\n", error_sum);
 
 	delete[] w1;
 	delete[] w2;
@@ -456,7 +583,7 @@ float NNet::train2()
 	return error_sum;
 }
 
-void NNet::forward2(float *w1, float *w2, float *w3, float *xn, int yn, float &pre_lbl)
+void NNet::forward2(double *w1, double *w2, double *w3, double *xn, int yn, double &pre_lbl)
 {
 	int Dim0 = this->nDim;
 	int Dim1 = 8;
@@ -464,54 +591,54 @@ void NNet::forward2(float *w1, float *w2, float *w3, float *xn, int yn, float &p
 	int Dim3 = 1;
 
 	// Forward
-	float *x0 = new float[Dim0+1];
+	double *x0 = new double[Dim0+1];
 	x0[0] = 1;
 	for(int i = 0; i < Dim0; i++)
 		x0[i+1] = xn[i];
 
 	//		S1 = X0 * W0;
 	// [Dim1 * 1] = [Dim0+1] [Dim0+1 * Dim1]
-	float *s1 = new float[Dim1];
-	float *pw1 = w1;
+	double *s1 = new double[Dim1];
+	double *pw1 = w1;
 	for(int i = 0; i < Dim1; i++, pw1+= (Dim0+1))
 	{
-		float sum = 0.0f;
+		double sum = 0.0f;
 		for(int k = 0; k < Dim0+1; k++)
 			sum += x0[k]*pw1[k];
 		s1[i] = sum;
 	}
 
 	//	X1 = tanh(S1);
-	float *x1 = new float[Dim1+1];
+	double *x1 = new double[Dim1+1];
 	x1[0] = 1;
 	for(int i = 0; i<Dim1; i++)
 		x1[i+1] = tanh(s1[i]);
 
 	//		S2 = X1 * W1;
 	// [Dim2 * 1] = [Dim1+1] [(Dim1+1) * Dim2] 
-	float *s2 = new float[Dim2];
-	float *pw2 = w2;
+	double *s2 = new double[Dim2];
+	double *pw2 = w2;
 	for(int i = 0; i < Dim2; i++, pw2+= (Dim1+1))
 	{
-		float sum = 0.0f;
+		double sum = 0.0f;
 		for(int k = 0; k < Dim1+1; k++)
 			sum += x1[k]*pw2[k];
 		s2[i] = sum;
 	}
 
 	// X2 = tanh(S2)
-	float *x2 = new float[Dim2+1];
+	double *x2 = new double[Dim2+1];
 	x2[0] = 1;
 	for(int i = 0; i < Dim2; i++)
 		x2[i+1] = tanh(s2[i]);
 
 	//	S3 = X2 * W2;
 	// [Dim2 * 1] = [Dim2+1] [ (Dim2+1) * Dim3]
-	float *s3 = new float[Dim3];
-	float *pw3 = w3;
+	double *s3 = new double[Dim3];
+	double *pw3 = w3;
 	for(int i = 0; i < Dim3; i++, pw3 += (Dim2+1))
 	{
-		float sum = 0.0f;
+		double sum = 0.0f;
 		for(int k = 0; k < Dim2+1; k++)
 			sum += x2[k]*pw3[k];
 		s3[i] = sum;
@@ -527,14 +654,14 @@ void NNet::forward2(float *w1, float *w2, float *w3, float *xn, int yn, float &p
 	delete[] s3;
 }
 
-float NNet::errorSum2(float *w1, float *w2, float *w3)
+double NNet::errorSum2(double *w1, double *w2, double *w3)
 {
-	float error_sum = 0.0f;
-	float *pX = this->datat;
+	double error_sum = 0.0f;
+	double *pX = this->datat;
 	int *pY = this->labelt;
-	for(int i = 0; i < this->nDatat; i++, pX += this->nDim, pY++)
+	for(int i = 0; i < this->nDatat; i++, pX += this->nDimt, pY++)
 	{
-		float pre_lbl;
+		double pre_lbl;
 		forward2(w1, w2, w3, pX, *pY, pre_lbl);
 		int r = *pY - pre_lbl;
 		error_sum += abs(r/2);
@@ -544,97 +671,194 @@ float NNet::errorSum2(float *w1, float *w2, float *w3)
 
 
 
-float NNet::gradientChecking(float *w1, float *w2, float *w3, 
-							float *theta1, float *theta2, float theta3, float *xn)
+void NNet::gradientChecking2(double *w1, double *w2, double *w3, 
+							double *theta1, double *theta2, double theta3, double *xn, int yn)
 {
-	float epsilon = 0.0001;
+	double epsilon = 0.0001;
 
 	int Dim0 = this->nDim;
 	int Dim1 = 8;
 	int Dim2 = 3;
 	int Dim3 = 1;
 
-	float *w1t = new float[(Dim0+1)*Dim1];
-	float *w2t = new float[(Dim1+1)*Dim2];
-	float *w3t = new float[(Dim2+1)*Dim3];
+	double *w1t = new double[(Dim0+1)*Dim1];
+	memcpy(w1t, w1, sizeof(double)*(Dim0+1)*Dim1);
+	double *w2t = new double[(Dim1+1)*Dim2];
+	memcpy(w2t, w2, sizeof(double)*(Dim1+1)*Dim2);
+	double *w3t = new double[(Dim2+1)*Dim3];
+	memcpy(w3t, w3, sizeof(double)*(Dim2+1)*Dim3);
+
+	double *x0 = new double[Dim0+1];
+	x0[0] = 1;
+	for(int i = 0; i < Dim0; i++)
+		x0[i+1] = xn[i];
 
 	// check w1
-	float *pw1t = w1t, *pw1 = w1;
-	for(int i = 0; i < Dim0+1; i++)
+	double *pw1t = w1t, *pw1 = w1;
+	for(int i = 0; i < Dim1; i++)
 	{
-		for(int j = 0; j < Dim1; j++)
+		for(int j = 0; j < Dim0+1; j++)
 		{
-			*pw1t = pw1 + epsilon;
-			float Jplus = NNCost(w1t, w2t, w3t);
-			*pw1t = pw1 - epsilon;
-			float Jminus = NNCost(w1t, w2t, w3t);
-			float deltaw1 = (Jplus - Jminus) / (2* epsilon);
-			float deltaw0 = theta1[i] * x0[j];		
-			if( abs(delta1 - delta0) > 0.001 )
-				printf("gradient error!")
+			*pw1t = *pw1 + epsilon;
+			double Jplus = NNCost2(w1t, w2t, w3t, xn, yn);
+			*pw1t = *pw1 - epsilon;
+			double Jminus = NNCost2(w1t, w2t, w3t, xn, yn);
+			double deltaw1 = (Jplus - Jminus) / (2* epsilon);
+			double deltaw0 = theta1[i] * x0[j];		
+			if( abs(deltaw1 - deltaw0) > epsilon )
+				printf("w1 gradient error!\nformula %0.5f\tlimit %0.5f\tdiff %0.5f\n", deltaw0, deltaw1, abs(deltaw0-deltaw1));
+			*pw1t = *pw1;
+			pw1t++;
+			pw1++;
 
 		}
 	}
 
+	double *s1 = new double[Dim1];
+	pw1 = w1;
+	for(int i = 0; i < Dim1; i++, pw1+= (Dim0+1))
+	{
+		double sum = 0.0f;
+		for(int k = 0; k < Dim0+1; k++)
+			sum += x0[k]*pw1[k];
+		s1[i] = sum;
+	}
 
+	// check w2
+	double *pw2t = w2t, *pw2 = w2;
+	double *x1 = new double[Dim1+1];
+	x1[0] = 1;
+	for(int i = 0; i<Dim1; i++)
+		x1[i+1] = tanh(s1[i]);
+
+
+	for(int i = 0; i < Dim2; i++)
+	{
+		for(int j = 0; j < Dim1+1; j++)
+		{
+			*pw2t = *pw2 + epsilon;
+			double Jplus = NNCost2(w1t, w2t, w3t, xn, yn);
+			*pw2t = *pw2 - epsilon;
+			double Jminus = NNCost2(w1t, w2t, w3t, xn, yn);
+			double deltaw1 = (Jplus - Jminus) / (2* epsilon);
+			double deltaw0 = theta2[i] * x1[j];		
+			if( abs(deltaw1 - deltaw0) > epsilon )
+				printf("w2 gradient error!\nformula %0.5f\tlimit %0.5f\tdiff %0.5f\n", deltaw0, deltaw1, abs(deltaw0-deltaw1));
+			*pw2t = *pw2;
+			pw2t++;
+			pw2++;
+		}
+	}
+
+	double *s2 = new double[Dim2];
+	pw2 = w2;
+	for(int i = 0; i < Dim2; i++, pw2+= (Dim1+1))
+	{
+		double sum = 0.0f;
+		for(int k = 0; k < Dim1+1; k++)
+			sum += x1[k]*pw2[k];
+		s2[i] = sum;
+	}
+
+	double *x2 = new double[Dim2+1];
+	x2[0] = 1;
+	for(int i = 0; i < Dim2; i++)
+		x2[i+1] = tanh(s2[i]);
+
+	// check w3
+	double *pw3t = w3t, *pw3 = w3;
+	for(int i = 0; i < Dim3; i++)
+	{
+		for(int j = 0; j < Dim2+1; j++)
+		{
+			*pw3t = *pw3 + epsilon;
+			double Jplus = NNCost2(w1t, w2t, w3t, xn, yn);
+			*pw3t = *pw3 - epsilon;
+			double Jminus = NNCost2(w1t, w2t, w3t, xn, yn);
+			double deltaw1 = (Jplus - Jminus) / (2*epsilon);	
+			double deltaw0 = theta3 * x2[j];
+			if(abs(deltaw0 - deltaw1) > epsilon)
+				printf("w3 gradient error!\nformula %0.5f limit %0.5f diff %0.5f\n", deltaw0, deltaw1, abs(deltaw0-deltaw1));
+			*pw3t = *pw3;
+			pw3t++;
+			pw3++;
+		}
+
+	}
+
+	delete[] w1t;
+	delete[] w2t;
+	delete[] w3t;
+
+	delete[] x0;
+	delete[] s1;
+	delete[] x1;
+	delete[] s2;
+	delete[] x2;
 
 }
 
 
-float NNet::NNCost(float *w1, float *w2, float *w3)
+double NNet::NNCost2(double *w1, double *w2, double *w3, double *xn, int yn)
 {
-	float *x0 = new float[Dim0+1];
+	int Dim0 = this->nDim;
+	int Dim1 = 8;
+	int Dim2 = 3;
+	int Dim3 = 1;
+
+	double *x0 = new double[Dim0+1];
 	x0[0] = 1;
 	for(int i = 0; i < Dim0; i++)
-		x0[i+1] = pdata[i];
+		x0[i+1] = xn[i];
 
-	float *s1 = new float[Dim1];
-	float *pw1 = w1;
+	double *s1 = new double[Dim1];
+	double *pw1 = w1;
 	for(int i = 0; i < Dim1; i++, pw1+= (Dim0+1))
 	{
-		float sum = 0.0f;
+		double sum = 0.0f;
 		for(int k = 0; k < Dim0+1; k++)
 			sum += x0[k]*pw1[k];
 		s1[i] = sum;
 	}
 
 	//	X1 = tanh(S1);
-	float *x1 = new float[Dim1+1];
+	double *x1 = new double[Dim1+1];
 	x1[0] = 1;
 	for(int i = 0; i<Dim1; i++)
 		x1[i+1] = tanh(s1[i]);
 
 	//		S2 = X1 * W1;
 	// [Dim2 * 1] = [Dim1+1] [(Dim1+1) * Dim2] 
-	float *s2 = new float[Dim2];
-	float *pw2 = w2;
+	double *s2 = new double[Dim2];
+	double *pw2 = w2;
 	for(int i = 0; i < Dim2; i++, pw2+= (Dim1+1))
 	{
-		float sum = 0.0f;
+		double sum = 0.0f;
 		for(int k = 0; k < Dim1+1; k++)
 			sum += x1[k]*pw2[k];
 		s2[i] = sum;
 	}
 
 	// X2 = tanh(S2)
-	float *x2 = new float[Dim2+1];
+	double *x2 = new double[Dim2+1];
 	x2[0] = 1;
 	for(int i = 0; i < Dim2; i++)
 		x2[i+1] = tanh(s2[i]);
 
 	//	S3 = X2 * W2;
 	// [Dim2 * 1] = [Dim2+1] [ (Dim2+1) * Dim3]
-	float *s3 = new float[Dim3];
-	float *pw3 = w3;
+	double *s3 = new double[Dim3];
+	double *pw3 = w3;
 	for(int i = 0; i < Dim3; i++, pw3 += (Dim2+1))
 	{
-		float sum = 0.0f;
+		double sum = 0.0f;
 		for(int k = 0; k < Dim2+1; k++)
 			sum += x2[k]*pw3[k];
 		s3[i] = sum;
 	}
 
-	float J = tanh(s3[0]);
+	double J = yn - tanh(s3[0]);
+	J *= J;
 
 	delete[] x0;
 	delete[] s1;

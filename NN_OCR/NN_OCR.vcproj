@@ -20,7 +20,7 @@
 			OutputDirectory="..\output"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="2"
+			CharacterSet="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -162,11 +162,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\main.cpp"
+				RelativePath=".\IMatrix.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\NNet.cpp"
+				RelativePath=".\ITrain.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\main.cpp"
 				>
 			</File>
 			<File
@@ -180,7 +184,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\NNet.h"
+				RelativePath=".\IMatrix.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ITrain.h"
 				>
 			</File>
 			<File

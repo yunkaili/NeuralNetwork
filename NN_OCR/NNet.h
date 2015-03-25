@@ -7,16 +7,19 @@ public:
 	~NNet(void);
 	void ImportTrainingData(char *dataFile);
 	void ImportTestingData(char *dataFile);
-	float train();
-	void forward(float *w1, float *w2, float *xn, int yn, float &pre_lbl);
-	float errorSum(float *w1, float *w2);
+	double train();
+	void forward(double *w1, double *w2, double *xn, int yn, double &pre_lbl);
+	double errorSum(double *w1, double *w2);
 
-	float train2();
-	void forward2(float *w1, float *w2, float *w3, float *xn, int yn, float &pre_lbl);
-	float errorSum2(float *w1, float *w2, float *w3);
+	void gradientChecking(double *w1, double *w2, double *theta1, double theta2, double *xn, int yn);
+	double NNCost(double *w1, double *w2, double *xn, int yn);
 
-	void gradientChecking();
-	float NNCost(float *w1, float *w2, float *w3);
+	double train2();
+	void forward2(double *w1, double *w2, double *w3, double *xn, int yn, double &pre_lbl);
+	double errorSum2(double *w1, double *w2, double *w3);
+	void gradientChecking2(double *w1, double *w2, double *w3, 
+		double *theta1, double *theta2, double theta3, double *xn, int yn);
+	double NNCost2(double *w1, double *w2, double *w3, double *xn, int yn);
 	
 	template<class T>
 	void ptrCheck(T *start, T *ptr, T val_limit, int dist_limit)
@@ -26,18 +29,24 @@ public:
 		
 		if(*ptr > 1000 || *ptr < -1000)
 			printf("\nERROR!\nptr value cross line\n");
-		
-		
+			
+	}
+
+	template<class T>
+	int sign(T val)
+	{
+		if(val <= 0) return -1;
+		else return 1;
 	}
 
 private:
-	float *data;
+	double *data;
 	int *label;
 	int nData;
 	int nCls;
 	int nDim;
 
-	float *datat;
+	double *datat;
 	int *labelt;
 	int nDatat;
 	int nClst;
