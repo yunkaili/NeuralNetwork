@@ -2,6 +2,7 @@
 #include "NNLayer.h"
 #include <stdio.h>
 #include <assert.h>
+#include <algorithm>
 
 NNLayer::NNLayer(int inputs_dim, int outputs_dim, double initW, double lr, std::string layer_name)
 {
@@ -76,7 +77,7 @@ void NNLayer::activation_function()
 			break;
 		case RELU:
 			for(int i = 1; i < outputs_dim; i++)
-				p_outputs[i] = max(0.0, p_scores[i-1]);
+				p_outputs[i] = std::max(0.0, p_scores[i-1]);
 			break;
 		case TANH:
 		default:
@@ -123,6 +124,7 @@ void NNLayer::backpopgation()
 		switch (costf)
 		{
 			case LOGISTIC_REGRESSION:
+
 				break;
 			case NORM2:	// theta_last = -2 * (yn - x_last) * x_last'
 			default:

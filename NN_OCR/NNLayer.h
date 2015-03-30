@@ -65,8 +65,8 @@ private:
 	/************************************************************************/
 	std::string Layer_Name;
 	// training option
-	std::string	transf;	// Transformation
-	std::string costf;	// Cost Function
+	int	transf;	// Transformation
+	int costf;	// Cost Function
 
 	bool gradient_check_enable;
 	bool cuda_boost;
@@ -95,7 +95,7 @@ private:
 	 void setTransf(int idx);
 	 void setCostf(int idx);
 	 void activation_function();
-	double gradient_activation_function();
+	double gradient_activation_function(double scores);
 	double getCost();
 };
 
