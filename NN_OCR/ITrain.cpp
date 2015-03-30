@@ -161,7 +161,7 @@ void ITrain::train()
 		nnet[size-1]->setData(NULL, y);
 		
 		for(int i = 0; i < size; i++)
-			nnet[i]->forward();
+			nnet[i]->feedforward();
 		
 		for(int i = size-1; i >= 0; i--)
 		{
@@ -211,7 +211,7 @@ void ITrain::test_Eout()
 		nnet[size-1]->setData(NULL, y);
 
 		for(int i = 0; i < size; i++)
-			nnet[i]->forward();
+			nnet[i]->feedforward();
 		
 		int output_dim = nnet[size-1]->getOutputDim();
 		double *output_mat = nnet[size-1]->getOutputs()->getMatrix();	
@@ -268,7 +268,7 @@ void ITrain::test_Ein()
 		nnet[size-1]->setData(NULL, y);
 
 		for(int i = 0; i < size; i++)
-			nnet[i]->forward();
+			nnet[i]->feedforward();
 
 		int output_dim = nnet[size-1]->getOutputDim();
 		double *output_mat = nnet[size-1]->getOutputs()->getMatrix();	

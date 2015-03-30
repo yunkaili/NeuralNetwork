@@ -53,7 +53,7 @@ public:
 	/*                       Training Functions                             */
 	/************************************************************************/
 
-	void forward();
+	void feedforward();
 	void backpopgation();
 	void updateWeights();
 	void gradientChecking();
@@ -75,7 +75,9 @@ private:
 	int inputs_dim;
 	int outputs_dim;
 	double lr;
-
+	
+	// Regularization
+	double lambda;
 	
 	IMatrix *inputs; // DO NOT DELETE. because it points to the previous outputs.
 	IMatrix *weights;
@@ -92,10 +94,9 @@ private:
 	/************************************************************************/
 	/*                           FUNCTIONS                                  */
 	/************************************************************************/
-	 void setTransf(int idx);
-	 void setCostf(int idx);
 	 void activation_function();
-	double gradient_activation_function(double scores);
+	//double gradient_activation_function(double scores);
+	 double gradient_activation_function(int idx);
 	double getCost();
 };
 

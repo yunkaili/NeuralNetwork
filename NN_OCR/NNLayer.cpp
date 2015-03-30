@@ -19,6 +19,8 @@ NNLayer::NNLayer(int inputs_dim, int outputs_dim, double initW, double lr, std::
 
 	this->Layer_Name = layer_name;
 
+	this->lambda = 0.0;
+
 	data = NULL;
 	lbl = NULL;
 	prev_layer = NULL;
@@ -41,7 +43,7 @@ NNLayer::~NNLayer(void)
 	if(grads != NULL) {delete grads; grads = NULL;}
 }
 
-void NNLayer::forward()
+void NNLayer::feedforward()
 {
 	double *p_inputs;
 	if (data)
@@ -87,23 +89,25 @@ void NNLayer::activation_function()
 	}
 }
 
-double NNLayer::gradient_activation_function(double scores)
+double NNLayer::gradient_activation_function(int idx)
 {
+	double *p_scores = scores->getMatrix();
+	double *p_outputs = outputs->getMatrix();
+
 	double val = 0.0;
 	switch (transf)
 	{
 		case SIMGMOID:
-			double tmp = -1*scores;
-			tmp = exp(tmp)+1;
-			val = (tmp-1) / (tmp*tmp);
+			val = (1-p_outputs[idx]) * p_outputs[idx];
 			break;
 		case RELU:	// scores should be the output of the layer
-			if(scores > 0) val = 1.0;
+			if (p_outputs[idx] > 0) val = 1.0;
 			break;
 		case TANH:
 		default:
-			val = cosh(scores);
+			val = cosh(p_scores[idx]);
 			val *= val;
+			val = 1 / val;
 			break;
 	}
 
@@ -113,7 +117,7 @@ double NNLayer::gradient_activation_function(double scores)
 void NNLayer::backpopgation()
 {
 	double *p_grads = grads->getMatrix();
-	double *p_scores= scores->getMatrix();
+	//double *p_scores= scores->getMatrix();
 
 	if(!next_layer)// output layer
 	{
@@ -124,12 +128,13 @@ void NNLayer::backpopgation()
 		switch (costf)
 		{
 			case LOGISTIC_REGRESSION:
-
+				for (int i = 1; i < outputs_dim; i++)
+					p_grads[i - 1] = (p_lbls[i] - p_outputs[i]) * gradient_activation_function(i - 1) / (p_outputs[i] * (1 - p_outputs[i]));
 				break;
 			case NORM2:	// theta_last = -2 * (yn - x_last) * x_last'
 			default:
 				for(int i = 1; i < outputs_dim; i++)
-					p_grads[i-1] = -2 * (p_lbls[i] - p_outputs[i]) / gradient_activation_function(p_scores[i-1]);//cosh(p_scores[i-1])*cosh(p_scores[i-1]));
+					p_grads[i-1] = -2 * (p_lbls[i] - p_outputs[i]) * gradient_activation_function(i-1);//cosh(p_scores[i-1])*cosh(p_scores[i-1]));
 				break;
 
 		}
@@ -146,7 +151,7 @@ void NNLayer::backpopgation()
 
 			double sum = 0.0;
 			for(int k = 0; k < outputs_dim_next-1; k++, p_weights_next += outputs_dim)
-				sum += p_grads_next[k] * (*p_weights_next) / gradient_activation_function(p_scores[i-1]);//(cosh(p_scores[i-1])*cosh(p_scores[i-1]));
+				sum += p_grads_next[k] * (*p_weights_next) * gradient_activation_function(i-1);//(cosh(p_scores[i-1])*cosh(p_scores[i-1]));
 
 			p_grads[i-1] = sum;
 		}
@@ -169,14 +174,14 @@ void NNLayer::updateWeights()
 	{
 		double grad = p_grads[i];
 		for(int k = 0; k < inputs_dim; k++)
-			p_weights[k] -= lr * grad * p_inputs[k];
+			p_weights[k] -= (lr * grad * p_inputs[k] + lambda * p_weights[k]);
 	}
 }
 
 double NNLayer::getCost()
 {
 	double J = 0.0;
-	forward();
+	feedforward();
 	if (next_layer)
 	{
 		J = next_layer->getCost();	
@@ -192,6 +197,15 @@ double NNLayer::getCost()
 			J *= J;
 		}
 	}
+
+	// Regularization
+	double sum_w = 0.0;
+	int len = weights->getRows() * weights->getRows();
+	double *p_weights = weights->getMatrix();
+	for (int i = 0; i < len; i++)
+		sum_w += p_weights[i] * p_weights[i];
+
+	J += lambda * sum_w * 0.5;
 
 	return J;
 }
@@ -272,18 +286,4 @@ void NNLayer::setData(IMatrix *data, IMatrix *lbl)
 		assert(0);
 	}
 
-}
-
-void NNLayer::setTransf(int idx)
-{
-	switch (idx)
-	{
-		case 0:
-			transf = "sigmoid";
-			break;
-		case 1:
-		default:
-			transf = "tanh"
-			break;
-	}
 }
