@@ -9,7 +9,7 @@ enum TRANSFORMATION
 {
 	SIMGMOID,
 	TANH,
-	LOGISTIC
+	RELU	// scores should be the output of the layer
 };
 
 enum COSTFUNCTION
@@ -17,7 +17,8 @@ enum COSTFUNCTION
 	NORM1,
 	NORM2,
 	LOGLIKEHOOD,
-	SOFTMAX
+	SOFTMAX,
+	LOGISTIC_REGRESSION
 };
 
 
@@ -91,9 +92,10 @@ private:
 	/************************************************************************/
 	/*                           FUNCTIONS                                  */
 	/************************************************************************/
-	void setTransf(int idx);
-
-	void activation_function();
+	 void setTransf(int idx);
+	 void setCostf(int idx);
+	 void activation_function();
+	double gradient_activation_function();
 	double getCost();
 };
 

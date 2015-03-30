@@ -68,8 +68,45 @@ void NNLayer::activation_function()
 	double *p_scores = scores->getMatrix();
 	double *p_outputs = outputs->getMatrix();
 	p_outputs[0] = 1;
-	for(int i = 1; i < outputs_dim; i++)
-		p_outputs[i] = tanh(p_scores[i-1]);
+	switch (transf)
+	{
+		case SIMGMOID:
+			for(int i = 1; i < outputs_dim; i++)
+				p_outputs[i] = 1/(1+exp(-1.0*p_scores[i-1]));
+			break;
+		case RELU:
+			for(int i = 1; i < outputs_dim; i++)
+				p_outputs[i] = max(0.0, p_scores[i-1]);
+			break;
+		case TANH:
+		default:
+			for(int i = 1; i < outputs_dim; i++)
+				p_outputs[i] = tanh(p_scores[i-1]);
+			break;
+	}
+}
+
+double NNLayer::gradient_activation_function(double scores)
+{
+	double val = 0.0;
+	switch (transf)
+	{
+		case SIMGMOID:
+			double tmp = -1*scores;
+			tmp = exp(tmp)+1;
+			val = (tmp-1) / (tmp*tmp);
+			break;
+		case RELU:	// scores should be the output of the layer
+			if(scores > 0) val = 1.0;
+			break;
+		case TANH:
+		default:
+			val = cosh(scores);
+			val *= val;
+			break;
+	}
+
+	return val;
 }
 
 void NNLayer::backpopgation()
@@ -82,9 +119,18 @@ void NNLayer::backpopgation()
 		double *p_outputs = outputs->getMatrix();
 		double *p_lbls = lbl->getMatrix();
 		
-		// theta_last = -2 * (yn - x_last) * x_last'
-		for(int i = 1; i < outputs_dim; i++)
-			p_grads[i-1] = -2 * (p_lbls[i] - p_outputs[i]) / (cosh(p_scores[i-1])*cosh(p_scores[i-1]));
+		
+		switch (costf)
+		{
+			case LOGISTIC_REGRESSION:
+				break;
+			case NORM2:	// theta_last = -2 * (yn - x_last) * x_last'
+			default:
+				for(int i = 1; i < outputs_dim; i++)
+					p_grads[i-1] = -2 * (p_lbls[i] - p_outputs[i]) / gradient_activation_function(p_scores[i-1]);//cosh(p_scores[i-1])*cosh(p_scores[i-1]));
+				break;
+
+		}
 	}
 	else
 	{
@@ -98,7 +144,7 @@ void NNLayer::backpopgation()
 
 			double sum = 0.0;
 			for(int k = 0; k < outputs_dim_next-1; k++, p_weights_next += outputs_dim)
-				sum += p_grads_next[k] * (*p_weights_next) / (cosh(p_scores[i-1])*cosh(p_scores[i-1]));
+				sum += p_grads_next[k] * (*p_weights_next) / gradient_activation_function(p_scores[i-1]);//(cosh(p_scores[i-1])*cosh(p_scores[i-1]));
 
 			p_grads[i-1] = sum;
 		}
